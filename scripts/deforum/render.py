@@ -75,7 +75,7 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
     using_vid_init = anim_args.animation_mode == 'Video Input'
 
     # load depth model for 3D
-    predict_depths = (anim_args.animation_mode == '3D' and anim_args.use_depth_warping) or anim_args.save_depth_maps
+    predict_depths = (anim_args.animation_mode == '3D' and anim_args.use_depth_warping) or anim_args.save_depth_maps or using_vid_init
     if predict_depths:
         depth_model = DepthModel(root.device)
         depth_model.load_midas(root.models_path)
@@ -86,7 +86,8 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
         anim_args.save_depth_maps = False
 
     # state for interpolating between diffusion steps
-    turbo_steps = 1 if using_vid_init else int(anim_args.diffusion_cadence)
+    #turbo_steps = 1 if using_vid_init else int(anim_args.diffusion_cadence)
+    turbo_steps = int(anim_args.diffusion_cadence)
     turbo_prev_image, turbo_prev_frame_idx = None, 0
     turbo_next_image, turbo_next_frame_idx = None, 0
 
@@ -164,7 +165,12 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
                 if anim_args.save_depth_maps:
                     depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{tween_frame_idx:05}.png"), depth)
             if turbo_next_image is not None:
-                prev_sample = sample_from_cv2(turbo_next_image)
+                frame_path = os.path.join(args.outdir, 'inputframes', f"{tween_frame_idx+1:05}.jpg")
+                print(f"Blending video init frame into tween: {frame_path}")
+                next_frame = cv2.imread(frame_path)
+                blended = cv2.addWeighted(np.float32(next_frame), 0.8, turbo_next_image, 0.2, 0)
+                #prev_sample = sample_from_cv2(turbo_next_image)
+                prev_sample = sample_from_cv2(blended)
 
         # apply transforms to previous frame
         if prev_sample is not None:
@@ -208,19 +214,22 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
             args.subseed_strength = keys.subseed_strength_series[frame_idx]
 
         print(f"{args.prompt} {args.seed}")
-        if not using_vid_init:
-            print(f"Angle: {keys.angle_series[frame_idx]} Zoom: {keys.zoom_series[frame_idx]}")
-            print(f"Tx: {keys.translation_x_series[frame_idx]} Ty: {keys.translation_y_series[frame_idx]} Tz: {keys.translation_z_series[frame_idx]}")
-            print(f"Rx: {keys.rotation_3d_x_series[frame_idx]} Ry: {keys.rotation_3d_y_series[frame_idx]} Rz: {keys.rotation_3d_z_series[frame_idx]}")
-            if anim_args.use_mask_video:
-                mask_frame = os.path.join(args.outdir, 'maskframes', f"{frame_idx+1:05}.jpg")
-                args.mask_file = mask_frame
+        #if not using_vid_init:
+        print(f"Angle: {keys.angle_series[frame_idx]} Zoom: {keys.zoom_series[frame_idx]}")
+        print(f"Tx: {keys.translation_x_series[frame_idx]} Ty: {keys.translation_y_series[frame_idx]} Tz: {keys.translation_z_series[frame_idx]}")
+        print(f"Rx: {keys.rotation_3d_x_series[frame_idx]} Ry: {keys.rotation_3d_y_series[frame_idx]} Rz: {keys.rotation_3d_z_series[frame_idx]}")
+        if anim_args.use_mask_video:
+            mask_frame = os.path.join(args.outdir, 'maskframes', f"{frame_idx+1:05}.jpg")
+            args.mask_file = mask_frame
 
         # grab init image for current frame
         if using_vid_init:
             init_frame = os.path.join(args.outdir, 'inputframes', f"{frame_idx+1:05}.jpg")            
-            print(f"Using video init frame {init_frame}")
-            args.init_image = init_frame
+            if (frame_idx == 0):
+                print(f"Using video init frame {init_frame}")                
+                args.init_image = init_frame
+            else:
+                args.init_image = None          
             if anim_args.use_mask_video:
                 mask_frame = os.path.join(args.outdir, 'maskframes', f"{frame_idx+1:05}.jpg")
                 args.mask_file = mask_frame
@@ -229,7 +238,14 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
         sample, image = generate(args, root, frame_idx, return_sample=True)
         if not using_vid_init:
             prev_sample = sample
-
+        else:
+            frame_path = os.path.join(args.outdir, 'inputframes', f"{frame_idx+1:05}.jpg")
+            print(f"Blending video init frame {frame_path}")
+            next_frame = cv2.imread(frame_path)
+            blended = cv2.addWeighted(next_frame, 0.75, sample_to_cv2(sample), 0.25, 0)
+            #blended = next_frame
+            prev_sample = sample_from_cv2(blended)
+            
         if turbo_steps > 1:
             turbo_prev_image, turbo_prev_frame_idx = turbo_next_image, turbo_next_frame_idx
             turbo_next_image, turbo_next_frame_idx = sample_to_cv2(sample, type=np.float32), frame_idx
