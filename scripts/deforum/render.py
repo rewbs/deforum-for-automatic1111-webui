@@ -167,7 +167,7 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
             if turbo_next_image is not None:
                 frame_path = os.path.join(args.outdir, 'inputframes', f"{tween_frame_idx+1:05}.jpg")
                 print(f"Blending video init frame into tween: {frame_path}")
-                next_frame = cv2.imread(frame_path)
+                next_frame = cv2.resize(cv2.imread(frame_path), (args.W, args.H))
                 blended = cv2.addWeighted(np.float32(next_frame), 0.8, turbo_next_image, 0.2, 0)
                 #prev_sample = sample_from_cv2(turbo_next_image)
                 prev_sample = sample_from_cv2(blended)
@@ -241,7 +241,7 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
         else:
             frame_path = os.path.join(args.outdir, 'inputframes', f"{frame_idx+1:05}.jpg")
             print(f"Blending video init frame {frame_path}")
-            next_frame = cv2.imread(frame_path)
+            next_frame = cv2.resize(cv2.imread(frame_path), (args.W, args.H))
             blended = cv2.addWeighted(next_frame, 0.75, sample_to_cv2(sample), 0.25, 0)
             #blended = next_frame
             prev_sample = sample_from_cv2(blended)
