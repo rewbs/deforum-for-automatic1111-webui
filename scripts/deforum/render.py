@@ -129,10 +129,10 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
         contrast = keys.contrast_schedule_series[frame_idx]
 
         # How much the input video influences the diffusion step,
-        input_video_blend_ratio = 0.3
+        input_video_blend_ratio = 0.8
 
         # How much the input video should show up in turbo frames.
-        turbo_frame_input_video_blend_ratio = 0.05
+        turbo_frame_input_video_blend_ratio = 0.125
  
 
         depth = None
