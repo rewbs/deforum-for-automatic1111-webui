@@ -127,6 +127,14 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
         strength = keys.strength_schedule_series[frame_idx]
         scale = keys.cfg_scale_schedule_series[frame_idx]
         contrast = keys.contrast_schedule_series[frame_idx]
+
+        # How much the input video influences the diffusion step,
+        input_video_blend_ratio = 0.3
+
+        # How much the input video should show up in turbo frames.
+        turbo_frame_input_video_blend_ratio = 0.05
+ 
+
         depth = None
         
         # emit in-between frames
@@ -152,7 +160,11 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
                     if advance_prev:
                         turbo_prev_image = anim_frame_warp_3d(root.device, turbo_prev_image, depth, anim_args, keys, tween_frame_idx)
                     if advance_next:
-                        turbo_next_image = anim_frame_warp_3d(root.device, turbo_next_image, depth, anim_args, keys, tween_frame_idx)
+                        frame_path = os.path.join(args.outdir, 'inputframes', f"{tween_frame_idx+1:05}.jpg")
+                        print(f"Blending video input frame into turbo frame with ratio {turbo_frame_input_video_blend_ratio}: {frame_path}")
+                        next_frame = cv2.resize(cv2.imread(frame_path), (args.W, args.H))                
+                        blended_turbo_next_image = cv2.addWeighted(np.float32(next_frame), turbo_frame_input_video_blend_ratio, turbo_next_image, 1-turbo_frame_input_video_blend_ratio, 0)
+                        turbo_next_image = anim_frame_warp_3d(root.device, blended_turbo_next_image, depth, anim_args, keys, tween_frame_idx)
                 turbo_prev_frame_idx = turbo_next_frame_idx = tween_frame_idx
 
                 if turbo_prev_image is not None and tween < 1.0:
@@ -165,12 +177,7 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
                 if anim_args.save_depth_maps:
                     depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{tween_frame_idx:05}.png"), depth)
             if turbo_next_image is not None:
-                frame_path = os.path.join(args.outdir, 'inputframes', f"{tween_frame_idx+1:05}.jpg")
-                print(f"Blending video init frame into tween: {frame_path}")
-                next_frame = cv2.resize(cv2.imread(frame_path), (args.W, args.H))
-                blended = cv2.addWeighted(np.float32(next_frame), 0.8, turbo_next_image, 0.2, 0)
-                #prev_sample = sample_from_cv2(turbo_next_image)
-                prev_sample = sample_from_cv2(blended)
+                prev_sample = sample_from_cv2(turbo_next_image)
 
         # apply transforms to previous frame
         if prev_sample is not None:
@@ -240,10 +247,9 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
             prev_sample = sample
         else:
             frame_path = os.path.join(args.outdir, 'inputframes', f"{frame_idx+1:05}.jpg")
-            print(f"Blending video init frame {frame_path}")
+            print(f"Blending video input frame into diffusion input with ratio {input_video_blend_ratio}: {frame_path}")
             next_frame = cv2.resize(cv2.imread(frame_path), (args.W, args.H))
-            blended = cv2.addWeighted(next_frame, 0.75, sample_to_cv2(sample), 0.25, 0)
-            #blended = next_frame
+            blended = cv2.addWeighted(next_frame, input_video_blend_ratio, sample_to_cv2(sample), 1-input_video_blend_ratio, 0)
             prev_sample = sample_from_cv2(blended)
             
         if turbo_steps > 1:

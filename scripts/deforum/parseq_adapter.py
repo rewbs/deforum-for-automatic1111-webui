@@ -36,7 +36,9 @@ class ParseqAnimKeys():
         self.zoom_series = self.parseq_to_anim_series('zoom' + optional_delta)
         self.translation_x_series = self.parseq_to_anim_series('translation_x' + optional_delta)
         self.translation_y_series = self.parseq_to_anim_series('translation_y' + optional_delta)
-        self.translation_z_series = self.parseq_to_anim_series('translation_z' + optional_delta)
+        #self.translation_z_series = self.parseq_to_anim_series('translation_z' + optional_delta)
+        #HACK: (/experiment) don't use delta for 3D zoom.
+        self.translation_z_series = self.parseq_to_anim_series('translation_z')
         self.rotation_3d_x_series = self.parseq_to_anim_series('rotation_3d_x' + optional_delta)
         self.rotation_3d_y_series = self.parseq_to_anim_series('rotation_3d_y' + optional_delta)
         self.rotation_3d_z_series = self.parseq_to_anim_series('rotation_3d_z' + optional_delta)
