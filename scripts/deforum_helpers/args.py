@@ -318,7 +318,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         #TODO make a some sort of the original dictionary parsing
         i9 = gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">Animation settings</p>")
         with gr.Row():
-            animation_mode = gr.Dropdown(label="animation_mode", choices=['2D', '3D', 'Video Input'], value=da.animation_mode, type="value", elem_id="animation_mode", interactive=True)
+            animation_mode = gr.Dropdown(label="animation_mode", choices=['2D', '3D', 'Video Input', 'Interpolation'], value=da.animation_mode, type="value", elem_id="animation_mode", interactive=True)
             max_frames = gr.Number(label="max_frames", value=da.max_frames, interactive=True, precision=0)
             border = gr.Dropdown(label="border", choices=['replicate', 'wrap'], value=da.border, type="value", elem_id="border", interactive=True)
         
@@ -476,8 +476,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         
         i16 = gr.HTML("<p style=\"margin-bottom:0.75em\">Interpolation (turned off atm)</p>")
         with gr.Row():
-            interpolate_key_frames = gr.Checkbox(label="interpolate_key_frames", value=da.interpolate_key_frames, interactive=False, visible = False)
-            interpolate_x_frames = gr.Number(label="interpolate_x_frames", value=da.interpolate_x_frames, interactive=False, precision=0, visible = False)#TODO
+            interpolate_key_frames = gr.Checkbox(label="interpolate_key_frames", value=da.interpolate_key_frames, interactive=False, visible = True)
+            interpolate_x_frames = gr.Number(label="interpolate_x_frames", value=da.interpolate_x_frames, interactive=False, precision=0, visible = True)#TODO
         
         i17 = gr.HTML("<p style=\"margin-bottom:0.75em\">Resume animation:</p>")
         with gr.Row():

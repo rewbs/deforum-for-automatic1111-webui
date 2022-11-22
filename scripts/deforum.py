@@ -66,7 +66,7 @@ class DeforumScript(wscripts.Script):
         shared.total_tqdm = deforum_settings.DeforumTQDM(args, anim_args, parseq_args)
         try:
             # dispatch to appropriate renderer
-            if anim_args.animation_mode == '2D' or anim_args.animation_mode == '3D':
+            if anim_args.animation_mode == '2D' or anim_args.animation_mode == '3D'  or anim_args.animation_mode == 'Interpolation':
                 if anim_args.use_mask_video: 
                     render_animation_with_video_mask(args, anim_args, parseq_args, root.animation_prompts, root) # allow mask video without an input video
                 else:    

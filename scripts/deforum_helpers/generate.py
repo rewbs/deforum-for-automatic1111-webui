@@ -164,6 +164,7 @@ def generate(args, root, frame = 0, return_sample=False):
                                           shape=(args.W, args.H),  
                                           use_alpha_as_mask=args.use_alpha_as_mask)
     else:
+        print("ROBINF DEBUG: Doing pure txt2img...")
         # sometimes my genius... is almost frightening
         p_txt = StableDiffusionProcessingTxt2Img(
                 sd_model=sd_model,

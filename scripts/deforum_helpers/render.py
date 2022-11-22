@@ -160,11 +160,14 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
                     if advance_prev:
                         turbo_prev_image = anim_frame_warp_3d(root.device, turbo_prev_image, depth, anim_args, keys, tween_frame_idx)
                     if advance_next:
-                        frame_path = os.path.join(args.outdir, 'inputframes', f"{tween_frame_idx+1:05}.jpg")
-                        print(f"Blending video input frame into turbo frame with ratio {turbo_frame_input_video_blend_ratio}: {frame_path}")
-                        next_frame = cv2.resize(cv2.imread(frame_path), (args.W, args.H))                
-                        blended_turbo_next_image = cv2.addWeighted(np.float32(next_frame), turbo_frame_input_video_blend_ratio, turbo_next_image, 1-turbo_frame_input_video_blend_ratio, 0)
-                        turbo_next_image = anim_frame_warp_3d(root.device, blended_turbo_next_image, depth, anim_args, keys, tween_frame_idx)
+                        if using_vid_init:
+                            frame_path = os.path.join(args.outdir, 'inputframes', f"{tween_frame_idx+1:05}.jpg")
+                            print(f"Blending video input frame into turbo frame with ratio {turbo_frame_input_video_blend_ratio}: {frame_path}")
+                            next_frame = cv2.resize(cv2.imread(frame_path), (args.W, args.H))                
+                            blended_turbo_next_image = cv2.addWeighted(np.float32(next_frame), turbo_frame_input_video_blend_ratio, turbo_next_image, 1-turbo_frame_input_video_blend_ratio, 0)
+                            turbo_next_image = anim_frame_warp_3d(root.device, blended_turbo_next_image, depth, anim_args, keys, tween_frame_idx)
+                        else:
+                            turbo_next_image = anim_frame_warp_3d(root.device, turbo_next_image, depth, anim_args, keys, tween_frame_idx)
                 turbo_prev_frame_idx = turbo_next_frame_idx = tween_frame_idx
 
                 if turbo_prev_image is not None and tween < 1.0:
@@ -202,12 +205,13 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
             noised_sample = add_noise(sample_from_cv2(contrast_sample), noise)
 
             # use transformed previous frame as init for current
-            args.use_init = True
-            if root.half_precision:
-                args.init_sample = noised_sample.half().to(root.device)
-            else:
-                args.init_sample = noised_sample.to(root.device)
-            args.strength = max(0.0, min(1.0, strength))
+            if anim_args.animation_mode != 'Interpolation':
+                args.use_init = True
+                if root.half_precision:
+                    args.init_sample = noised_sample.half().to(root.device)
+                else:
+                    args.init_sample = noised_sample.to(root.device)
+                args.strength = max(0.0, min(1.0, strength))
         args.scale = scale
 
         # grab prompt for current frame
