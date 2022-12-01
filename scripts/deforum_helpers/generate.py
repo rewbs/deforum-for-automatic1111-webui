@@ -122,13 +122,14 @@ def generate(args, root, frame = 0, return_sample=False):
     p.do_not_save_samples = not args.save_sample_per_step
     p.do_not_save_grid = not args.make_grid
     p.sd_model=sd_model
-    p.sampler_index = int(args.sampler)
+    p.sampler_name = args.sampler
     p.mask_blur = args.mask_overlay_blur
     p.extra_generation_params["Mask blur"] = args.mask_overlay_blur
     p.n_iter = 1
     p.steps = args.steps
     p.denoising_strength = 1 - args.strength
     p.cfg_scale = args.scale
+    p.seed_enable_extras = args.seed_enable_extras
 
     # FIXME better color corrections as match histograms doesn't seem to be fully working
     if root.color_corrections is not None:
@@ -164,8 +165,7 @@ def generate(args, root, frame = 0, return_sample=False):
                                           shape=(args.W, args.H),  
                                           use_alpha_as_mask=args.use_alpha_as_mask)
     else:
-        print("ROBINF DEBUG: Doing pure txt2img...")
-        # sometimes my genius... is almost frightening
+        print(f"Not using an init image (doing pure txt2img) - seed:{p.seed}; subseed:{p.subseed}; subseed_strength:{p.subseed_strength}; cfg_scale:{p.cfg_scale}; steps:{p.steps}")
         p_txt = StableDiffusionProcessingTxt2Img(
                 sd_model=sd_model,
                 outpath_samples=p.outpath_samples,
@@ -178,8 +178,8 @@ def generate(args, root, frame = 0, return_sample=False):
                 subseed_strength=p.subseed_strength,
                 seed_resize_from_h=p.seed_resize_from_h,
                 seed_resize_from_w=p.seed_resize_from_w,
-                seed_enable_extras=None,
-                sampler_index=p.sampler_index,
+                seed_enable_extras=p.seed_enable_extras,
+                sampler_name=p.sampler_name,
                 batch_size=p.batch_size,
                 n_iter=p.n_iter,
                 steps=p.steps,
@@ -189,7 +189,7 @@ def generate(args, root, frame = 0, return_sample=False):
                 restore_faces=p.restore_faces,
                 tiling=p.tiling,
                 enable_hr=None,
-                denoising_strength=None,#for initial image
+                denoising_strength=None,
             )
         processed = processing.process_images(p_txt)
     
