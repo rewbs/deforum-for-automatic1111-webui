@@ -476,8 +476,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         
         i16 = gr.HTML("<p style=\"margin-bottom:0.75em\">Interpolation (turned off atm)</p>")
         with gr.Row():
-            interpolate_key_frames = gr.Checkbox(label="interpolate_key_frames", value=da.interpolate_key_frames, interactive=False, visible = True)
-            interpolate_x_frames = gr.Number(label="interpolate_x_frames", value=da.interpolate_x_frames, interactive=False, precision=0, visible = True)#TODO
+            interpolate_key_frames = gr.Checkbox(label="interpolate_key_frames", value=da.interpolate_key_frames, interactive=False, visible = False)
+            interpolate_x_frames = gr.Number(label="interpolate_x_frames", value=da.interpolate_x_frames, interactive=False, precision=0, visible = False)#TODO
         
         i17 = gr.HTML("<p style=\"margin-bottom:0.75em\">Resume animation:</p>")
         with gr.Row():
