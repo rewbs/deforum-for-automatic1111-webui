@@ -44,7 +44,8 @@ def get_samplers_list():
         'ddim': 'DDIM',
         'plms': 'PLMS',
         'unipc': 'UniPC',
-        'restart': 'Restart'
+        'restart': 'Restart',
+        'LCM Test': 'LCM Test'
     }
 
 def DeforumAnimPrompts():
