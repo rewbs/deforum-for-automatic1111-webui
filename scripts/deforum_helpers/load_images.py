@@ -58,7 +58,7 @@ def load_image(image_path :str, image_box :Image.Image):
         except:
             raise ConnectionError("There is no active internet connection available (couldn't connect to google.com as a network test) - please use *local* masks and init files only.")
         try:
-            response = requests.get(image_path, stream=True)
+            response = requests.get(image_path, stream=True, allow_redirects=True)
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"Failed to download image {image_path} due to no internet connection. Error: {e}")
         if response.status_code == 404 or response.status_code != 200:

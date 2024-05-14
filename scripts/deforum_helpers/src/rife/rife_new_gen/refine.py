@@ -14,7 +14,7 @@ def conv(in_planes, out_planes, kernel_size=3, stride=1, padding=1, dilation=1):
     return nn.Sequential(
         nn.Conv2d(in_planes, out_planes, kernel_size=kernel_size, stride=stride,
                   padding=padding, dilation=dilation, bias=True),
-        nn.PReLU(out_planes)
+        nn.LeakyReLU(0.2, True)
         )
 
 def conv_woact(in_planes, out_planes, kernel_size=3, stride=1, padding=1, dilation=1):
@@ -26,7 +26,7 @@ def conv_woact(in_planes, out_planes, kernel_size=3, stride=1, padding=1, dilati
 def deconv(in_planes, out_planes, kernel_size=4, stride=2, padding=1):
     return nn.Sequential(
         torch.nn.ConvTranspose2d(in_channels=in_planes, out_channels=out_planes, kernel_size=4, stride=2, padding=1, bias=True),
-        nn.PReLU(out_planes)
+        nn.LeakyReLU(0.2, True)
         )
             
 class Conv2(nn.Module):

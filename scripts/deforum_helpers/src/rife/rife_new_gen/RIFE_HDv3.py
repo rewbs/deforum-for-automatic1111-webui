@@ -21,7 +21,7 @@ class Model:
         self.device()
         self.optimG = AdamW(self.flownet.parameters(), lr=1e-6, weight_decay=1e-4)
         self.epe = EPE()
-        self.version = 3.9
+        self.version = 4.8
         # self.vgg = VGGPerceptualLoss().to(device)
         self.sobel = SOBEL()
         if local_rank != -1:
@@ -36,7 +36,7 @@ class Model:
     def device(self):
         self.flownet.to(device)
          
-    def load_model(self, path, rank, deforum_models_path):
+    def load_model(self, path, rank=0, deforum_models_path=None):
         
         download_rife_model(path, deforum_models_path)
 
@@ -91,7 +91,11 @@ class Model:
             }
 
 def download_rife_model(path, deforum_models_path):
-    options = {'RIFE46': (                          
+    options = {
+            'RIFE414': (                          
+               'TODO', 
+                          "TODO"),         
+            'RIFE46': (
                'af6f0b4bed96dea2c9f0624b449216c7adfaf7f0b722fba0c8f5c6e20b2ec39559cf33f3d238d53b160c22f00c6eaa47dc54a6e4f8aa4f59a6e4a9e90e1a808a', 
                           "https://github.com/hithereai/Practical-RIFE/releases/download/rife46/RIFE46.pkl"), 
                'RIFE43': ('ed660f58708ee369a0b3855f64d2d07a6997d949f33067faae51d740123c5ee015901cc57553594f2df8ec08131a1c5f7c883c481eac0f9addd84379acea90c8', 

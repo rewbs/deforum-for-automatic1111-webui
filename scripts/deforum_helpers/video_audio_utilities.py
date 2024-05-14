@@ -169,7 +169,7 @@ def get_extension_if_valid(path_to_check, acceptable_extensions: list[str] ) -> 
         if response.status_code != 200:
             raise ConnectionError(f"URL {path_to_check} is not valid. Response status code: {response.status_code}")
 
-        extension = path_to_check.rsplit('?', 1)[0].rsplit('.', 1)[-1] # remove query string before checking file format extension.
+        extension = path_to_check.rsplit('?', 1)[0].rsplit('.', 1)[-1].lower() # remove query string before checking file format extension.
         if extension in acceptable_extensions:
             return extension
 

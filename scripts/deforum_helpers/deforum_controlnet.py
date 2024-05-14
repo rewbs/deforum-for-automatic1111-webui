@@ -89,11 +89,11 @@ def setup_controlnet_ui_raw():
                 gr.update(visible=True)
             ]
         else:
+            grs.append(gr.update(label=flag_preprocessor_resolution, value=512, minimum=64, maximum=2048, step=1, visible=not pp, interactive=not pp),)
+
             for slider_config in preprocessor_sliders_config[module]:
                 if isinstance(slider_config, dict):
                     visible = True
-                    if slider_config['name'] == flag_preprocessor_resolution:
-                        visible = not pp
                     grs.append(gr.update(
                         label=slider_config['name'],
                         value=slider_config['value'],
